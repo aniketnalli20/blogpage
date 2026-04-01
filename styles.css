@@ -12,6 +12,22 @@
   --pill-bg: #fdebd2;
 }
 
+@font-face {
+  font-family: Inter;
+  src: url("./assets/fonts/inter/Inter-Variable.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: Inter;
+  src: url("./assets/fonts/inter/Inter-VariableItalic.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
 *,
 *::before,
 *::after {
