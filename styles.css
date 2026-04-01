@@ -2114,6 +2114,23 @@ html {
   .feature-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+  .workspace__layout {
+    grid-template-columns: 1fr;
+  }
+  .workspace__nav {
+    position: static;
+    grid-auto-flow: column;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .workspace__preview {
+    position: static;
+  }
+  .ws-grid {
+    grid-template-columns: 1fr;
+  }
+  .ws-add {
+    grid-template-columns: 1fr;
+  }
   .bio__grid {
     grid-template-columns: 1fr;
   }
@@ -2170,6 +2187,19 @@ html {
 @media (max-width: 720px) {
   .auth-brand {
     left: 16px;
+  }
+  .workspace {
+    padding: 18px;
+  }
+  .workspace__head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .workspace__head-actions {
+    justify-content: flex-start;
+  }
+  .workspace__nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .auth-social {
     grid-template-columns: 1fr;
