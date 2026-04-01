@@ -2220,6 +2220,11 @@ html {
   place-items: center;
   margin: 0 auto;
   color: #f59e0b;
+  line-height: 1;
+}
+
+.chat__bubble svg {
+  display: block;
 }
 
 @media (max-width: 1100px) {

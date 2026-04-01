@@ -805,6 +805,7 @@ function getDefaultWorkspace() {
     account: {
       email: "",
       phone: "",
+      googleAccounts: [],
     },
     branding: {
       primary: "#f08a2a",
@@ -817,6 +818,7 @@ function getDefaultWorkspace() {
       buttonStyle: "filled",
       radius: 999,
       spacing: "comfortable",
+      published: false,
     },
     links: [
       { id: "l1", title: "Book Now", url: "https://example.com/book" },
@@ -882,6 +884,7 @@ function renderWorkspace(state) {
     btn.classList.toggle("is-active", v === state.bio.template);
   });
 
+  renderGoogleAccounts(state);
   renderLinksList(state);
   renderPreview(state);
   updateNavbarProfile();
@@ -935,6 +938,61 @@ function renderLinksList(state) {
     actions.appendChild(del);
 
     row.appendChild(drag);
+    row.appendChild(meta);
+    row.appendChild(actions);
+    root.appendChild(row);
+  });
+}
+
+function renderGoogleAccounts(state) {
+  const root = document.getElementById("ws-google-accounts");
+  if (!root) return;
+  const accounts = Array.isArray(state.account.googleAccounts) ? state.account.googleAccounts : [];
+  root.innerHTML = "";
+
+  if (!accounts.length) {
+    const empty = document.createElement("div");
+    empty.className = "ws-empty";
+    empty.textContent = "No Google accounts added yet.";
+    root.appendChild(empty);
+    return;
+  }
+
+  accounts.forEach((email) => {
+    const row = document.createElement("div");
+    row.className = "ws-link";
+
+    const icon = document.createElement("div");
+    icon.className = "ws-link__drag";
+    icon.textContent = "G";
+
+    const meta = document.createElement("div");
+    meta.className = "ws-link__meta";
+
+    const title = document.createElement("div");
+    title.className = "ws-link__title";
+    title.textContent = email;
+
+    const hint = document.createElement("div");
+    hint.className = "ws-link__url";
+    hint.textContent = "Google account";
+
+    meta.appendChild(title);
+    meta.appendChild(hint);
+
+    const actions = document.createElement("div");
+    actions.className = "ws-link__actions";
+
+    const del = document.createElement("button");
+    del.className = "ws-link__btn";
+    del.type = "button";
+    del.setAttribute("data-ws-google-del", email);
+    del.setAttribute("aria-label", "Remove");
+    del.textContent = "×";
+
+    actions.appendChild(del);
+
+    row.appendChild(icon);
     row.appendChild(meta);
     row.appendChild(actions);
     root.appendChild(row);
@@ -1047,6 +1105,16 @@ function initWorkspace() {
     "ws-phone": [FormValidationCore.maxLength(24, "Phone is too long.")],
     "ws-link-title": [FormValidationCore.required("Title is required."), FormValidationCore.maxLength(40, "Title is too long.")],
     "ws-link-url": [FormValidationCore.required("URL is required."), FormValidationCore.urlLike("Use https://, mailto:, or tel:")],
+    "ws-google-email": [
+      FormValidationCore.required("Email is required."),
+      FormValidationCore.email("Enter a valid email."),
+      (value) => {
+        const v = String(value ?? "").trim().toLowerCase();
+        if (!v) return "";
+        if (!/@(gmail\.com|googlemail\.com)$/.test(v)) return "Must be a Gmail/Googlemail address.";
+        return "";
+      },
+    ],
   };
 
   const wsValidateInput = (el, markTouched) => {
@@ -1082,6 +1150,24 @@ function initWorkspace() {
   });
   wsBindValidation("ws-link-title");
   wsBindValidation("ws-link-url");
+
+  const googleAdd = document.getElementById("ws-google-add");
+  if (googleAdd) {
+    googleAdd.addEventListener("click", () => {
+      const input = document.getElementById("ws-google-email");
+      if (!(input instanceof HTMLInputElement)) return;
+      const msg = wsValidateInput(input, true);
+      if (msg) return;
+      const email = String(input.value || "").trim().toLowerCase();
+      const current = Array.isArray(state.account.googleAccounts) ? state.account.googleAccounts : [];
+      const next = current.includes(email) ? current : [...current, email];
+      state = { ...state, account: { ...state.account, googleAccounts: next } };
+      setWorkspace(state);
+      input.value = "";
+      FormUI.clearFieldError("workspace", input);
+      renderWorkspace(state);
+    });
+  }
 
   const logo = document.getElementById("ws-logo");
   if (logo) {
