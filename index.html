@@ -290,8 +290,14 @@
                   <div class="ws-field ws-field--full">
                     <div class="ws-field__label">Add a link</div>
                     <div class="ws-add">
-                      <input class="ws-field__input" id="ws-link-title" type="text" placeholder="Title (e.g., Book now)" />
-                      <input class="ws-field__input" id="ws-link-url" type="url" placeholder="https://..." />
+                      <label class="ws-field">
+                        <div class="ws-field__label">Title</div>
+                        <input class="ws-field__input" id="ws-link-title" type="text" placeholder="Book now" />
+                      </label>
+                      <label class="ws-field">
+                        <div class="ws-field__label">URL</div>
+                        <input class="ws-field__input" id="ws-link-url" type="url" placeholder="https://..." />
+                      </label>
                       <button class="btn btn--primary" type="button" id="ws-link-add">Add</button>
                     </div>
                   </div>
