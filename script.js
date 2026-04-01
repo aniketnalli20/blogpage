@@ -97,6 +97,8 @@ document.querySelectorAll("form").forEach((form) => {
       setStatus(form, `Account created. Trial started on ${plan}.`);
     } else if (name === "form-login") {
       setStatus(form, "Logged in successfully.");
+    } else if (name === "form-login-page") {
+      setStatus(form, "Logged in successfully.");
     } else if (name === "form-demo") {
       setStatus(form, "Request received. We’ll email you to schedule a demo.");
     } else if (name === "form-contact") {
@@ -108,5 +110,27 @@ document.querySelectorAll("form").forEach((form) => {
     window.setTimeout(() => {
       if (button) button.disabled = false;
     }, 700);
+  });
+});
+
+document.querySelectorAll("[data-toggle-password]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const selector = btn.getAttribute("data-toggle-password");
+    if (!selector) return;
+    const input = document.querySelector(selector);
+    if (!(input instanceof HTMLInputElement)) return;
+
+    const nextType = input.type === "password" ? "text" : "password";
+    input.type = nextType;
+    btn.setAttribute("aria-label", nextType === "password" ? "Show password" : "Hide password");
+  });
+});
+
+document.querySelectorAll("[data-provider]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const provider = btn.getAttribute("data-provider") || "provider";
+    const form = btn.closest("form");
+    if (!form) return;
+    setStatus(form, `${provider} sign-in is coming soon.`);
   });
 });

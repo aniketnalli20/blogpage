@@ -327,6 +327,10 @@ a {
   max-width: 52ch;
 }
 
+.hero__lead--secondary {
+  margin-top: 10px;
+}
+
 .hero__actions {
   display: flex;
   gap: 12px;
@@ -445,6 +449,112 @@ a {
   max-width: 68ch;
   color: var(--muted);
   line-height: 1.7;
+}
+
+.bio {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  box-shadow: var(--shadow-soft);
+  padding: 30px;
+}
+
+.bio__grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.bio__title {
+  margin: 0;
+  font-size: 24px;
+  letter-spacing: -0.03em;
+}
+
+.bio__text {
+  margin: 10px 0 0;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.bio__actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 16px;
+}
+
+.bio__card {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 18px;
+  box-shadow: 0 16px 38px rgba(17, 24, 39, 0.06);
+}
+
+.bio__card-title {
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  margin-bottom: 10px;
+}
+
+.bio__note {
+  margin-top: 12px;
+  color: var(--muted);
+  line-height: 1.6;
+  font-size: 13px;
+}
+
+.bullets {
+  margin: 0;
+  padding: 0 0 0 18px;
+  color: #374151;
+  line-height: 1.8;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.bullets--compact {
+  margin-top: 6px;
+}
+
+.bullets--compact li {
+  margin: 2px 0;
+}
+
+.bullets--center {
+  max-width: 72ch;
+  margin: 0 auto;
+}
+
+.value-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.value {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 18px;
+  box-shadow: 0 16px 38px rgba(17, 24, 39, 0.06);
+  display: grid;
+  gap: 8px;
+}
+
+.value__title {
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  font-size: 15px;
+}
+
+.value__text {
+  color: var(--muted);
+  line-height: 1.6;
+  font-size: 14px;
 }
 
 .feature-grid {
@@ -954,6 +1064,9 @@ html {
   .feature-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+  .bio__grid {
+    grid-template-columns: 1fr;
+  }
   .solution-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -961,6 +1074,9 @@ html {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
   .quotes {
+    grid-template-columns: 1fr;
+  }
+  .value-grid {
     grid-template-columns: 1fr;
   }
   .pricing {

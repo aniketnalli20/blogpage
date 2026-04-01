@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LensBlaze - Log in</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body class="auth-body">
+    <main class="auth-shell" role="main">
+      <a class="brand auth-brand" href="./index.html" aria-label="LensBlaze home">
+        <span class="brand__mark" aria-hidden="true">
+          <svg viewBox="0 0 64 64" width="28" height="28">
+            <defs>
+              <linearGradient id="g2" x1="0" x2="1" y1="0" y2="1">
+                <stop offset="0" stop-color="#f2b24a" />
+                <stop offset="1" stop-color="#f08a2a" />
+              </linearGradient>
+            </defs>
+            <path fill="url(#g2)" d="M32 6 52 18v28L32 58 12 46V18z" opacity="0.25" />
+            <path
+              fill="url(#g2)"
+              d="M20 20h10l-6 10h-10zm14 0h10l-6 10h-10zm-7 14h10l-6 10H21zm14 0h10l-6 10H35z"
+            />
+          </svg>
+        </span>
+        <span class="brand__name">LensBlaze</span>
+      </a>
+
+      <section class="auth-card" aria-label="Login">
+        <div class="auth-card__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="18" height="18">
+            <path
+              fill="currentColor"
+              d="M10 7V6a4 4 0 0 1 8 0v1h1a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H11a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h-1zm2 0h4V6a2 2 0 0 0-4 0v1zm1 6.7V17h2v-3.3a2 2 0 1 0-2 0z"
+            />
+          </svg>
+        </div>
+
+        <h1 class="auth-card__title">Sign in with email</h1>
+        <p class="auth-card__subtitle">Access your LensBlaze workspace.</p>
+
+        <form class="auth-form" id="form-login-page">
+          <label class="auth-field">
+            <span class="sr-only">Email</span>
+            <span class="auth-field__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="18" height="18">
+                <path
+                  fill="currentColor"
+                  d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6zm2 0 6 5 6-5H6zm14 2.2-8 6.6L4 8.2V18h16V8.2z"
+                />
+              </svg>
+            </span>
+            <input class="auth-field__input" name="email" type="email" placeholder="Email" autocomplete="email" required />
+          </label>
+
+          <label class="auth-field">
+            <span class="sr-only">Password</span>
+            <span class="auth-field__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="18" height="18">
+                <path
+                  fill="currentColor"
+                  d="M12 2a5 5 0 0 1 5 5v2h1a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2h1V7a5 5 0 0 1 5-5zm3 7V7a3 3 0 0 0-6 0v2h6z"
+                />
+              </svg>
+            </span>
+            <input
+              class="auth-field__input"
+              id="login-password"
+              name="password"
+              type="password"
+              placeholder="Password"
+              autocomplete="current-password"
+              required
+            />
+            <button class="auth-field__toggle" type="button" data-toggle-password="#login-password" aria-label="Show password">
+              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                <path
+                  fill="currentColor"
+                  d="M12 5c5.5 0 10 5.3 10 7s-4.5 7-10 7S2 13.7 2 12s4.5-7 10-7zm0 2c-4.5 0-8.2 4.1-8.2 5s3.7 5 8.2 5 8.2-4.1 8.2-5-3.7-5-8.2-5zm0 2.2a2.8 2.8 0 1 1 0 5.6 2.8 2.8 0 0 1 0-5.6z"
+                />
+              </svg>
+            </button>
+          </label>
+
+          <div class="auth-row">
+            <a class="auth-link" href="mailto:support@lensblaze.com">Forgot password?</a>
+          </div>
+
+          <button class="btn btn--primary auth-submit" type="submit">Get Started</button>
+          <div class="form__status" aria-live="polite"></div>
+
+          <div class="auth-divider" aria-hidden="true">
+            <span class="auth-divider__line"></span>
+            <span class="auth-divider__text">Or sign in with</span>
+            <span class="auth-divider__line"></span>
+          </div>
+
+          <div class="auth-social" role="group" aria-label="Sign in options">
+            <button class="auth-social__btn" type="button" data-provider="Google" aria-label="Continue with Google">
+              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                <path
+                  fill="#EA4335"
+                  d="M12 11.5v3.1h7.3c-.3 1.8-2.1 5.3-7.3 5.3-4.4 0-8-3.6-8-8s3.6-8 8-8c2.5 0 4.2 1.1 5.2 2l-2.1 2.1c-.6-.6-1.7-1.3-3.1-1.3-2.6 0-4.7 2.1-4.7 4.7s2.1 4.7 4.7 4.7c3 0 4.1-2.1 4.3-3.2H12z"
+                />
+                <path fill="#34A853" d="M3.6 7.7l2.6 1.9C6.9 8.2 8.3 7 10 7c1.4 0 2.5.7 3.1 1.3l2.1-2.1C14.2 5.2 12.5 4 10 4 7 4 4.5 5.6 3.6 7.7z" opacity=".001" />
+              </svg>
+              <span>Google</span>
+            </button>
+            <button class="auth-social__btn" type="button" data-provider="Facebook" aria-label="Continue with Facebook">
+              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                <path
+                  fill="#1877F2"
+                  d="M22 12.1C22 6.5 17.5 2 11.9 2S2 6.5 2 12.1c0 5 3.7 9.1 8.5 9.8v-6.9H8v-2.9h2.5V9.9c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.3.2 2.3.2v2.5h-1.3c-1.3 0-1.7.8-1.7 1.6v1.9h2.9l-.5 2.9h-2.4V22c4.9-.7 8.6-4.8 8.6-9.9z"
+                />
+              </svg>
+              <span>Facebook</span>
+            </button>
+            <button class="auth-social__btn" type="button" data-provider="Apple" aria-label="Continue with Apple">
+              <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                <path
+                  fill="currentColor"
+                  d="M16.6 13.2c0-1.8 1-2.7 1.1-2.8-1.1-.8-2.2-.9-2.7-.9-1.1-.1-2.2.7-2.8.7-.6 0-1.6-.7-2.6-.7-1.3 0-2.6.8-3.3 2-1.4 2.4-.3 6 1 8 .6 1 1.4 2.1 2.4 2.1 1 0 1.3-.6 2.5-.6 1.2 0 1.5.6 2.6.6 1.1 0 1.7-1 2.3-2 .7-1.1 1-2.2 1-2.2-.1 0-1.5-.6-1.5-2.4zM14.8 7.3c.5-.7.9-1.7.8-2.7-.8.1-1.7.6-2.2 1.3-.5.6-.9 1.6-.8 2.6.9.1 1.7-.4 2.2-1.2z"
+                />
+              </svg>
+              <span>Apple</span>
+            </button>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
