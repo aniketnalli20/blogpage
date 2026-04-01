@@ -590,23 +590,19 @@ a {
 }
 
 .hero__thumb--one {
-  background-image: radial-gradient(circle at 30% 35%, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0) 55%),
-    linear-gradient(135deg, rgba(242, 178, 74, 0.9), rgba(240, 138, 42, 0.7));
+  background-image: url("./assets/photo-1.jpg");
 }
 
 .hero__thumb--two {
-  background-image: radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0) 55%),
-    linear-gradient(135deg, rgba(90, 205, 255, 0.9), rgba(59, 130, 246, 0.65));
+  background-image: url("./assets/photo-2.jpg");
 }
 
 .hero__thumb--three {
-  background-image: radial-gradient(circle at 70% 35%, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0) 55%),
-    linear-gradient(135deg, rgba(16, 185, 129, 0.85), rgba(20, 184, 166, 0.7));
+  background-image: url("./assets/photo-3.jpg");
 }
 
 .hero__thumb--four {
-  background-image: radial-gradient(circle at 28% 30%, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0) 55%),
-    linear-gradient(135deg, rgba(99, 102, 241, 0.85), rgba(236, 72, 153, 0.65));
+  background-image: url("./assets/photo-4.jpg");
 }
 
 .hero__stats {
@@ -1692,18 +1688,15 @@ html {
 }
 
 .card__image--one {
-  background-image: radial-gradient(circle at 20% 25%, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0) 56%),
-    linear-gradient(135deg, rgba(99, 102, 241, 0.85), rgba(59, 130, 246, 0.65));
+  background-image: url("./assets/photo-2.jpg");
 }
 
 .card__image--two {
-  background-image: radial-gradient(circle at 75% 20%, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0) 58%),
-    linear-gradient(135deg, rgba(16, 185, 129, 0.82), rgba(34, 197, 94, 0.62));
+  background-image: url("./assets/photo-3.jpg");
 }
 
 .card__image--three {
-  background-image: radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0) 58%),
-    linear-gradient(135deg, rgba(242, 178, 74, 0.7), rgba(240, 138, 42, 0.6));
+  background-image: url("./assets/photo-4.jpg");
 }
 
 .card__body {
