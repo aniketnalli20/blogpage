@@ -1444,6 +1444,7 @@ function initWorkspace() {
         if (firstInvalid && typeof firstInvalid.focus === "function") firstInvalid.focus();
         return;
       }
+      state = { ...state, bio: { ...state.bio, published: true } };
       setWorkspace(state);
       publish.textContent = "Saved";
       window.setTimeout(() => {
