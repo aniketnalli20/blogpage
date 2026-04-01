@@ -1841,6 +1841,114 @@ a {
   margin-top: 4px;
 }
 
+.footer {
+  margin-top: 18px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  box-shadow: 0 18px 44px rgba(17, 24, 39, 0.06);
+  padding: 28px;
+  overflow: hidden;
+}
+
+.footer__grid {
+  display: grid;
+  grid-template-columns: 1.7fr repeat(4, minmax(140px, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+.footer__brand {
+  display: grid;
+  gap: 10px;
+  padding-right: 6px;
+}
+
+.footer__name {
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  font-size: 18px;
+}
+
+.footer__text {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.7;
+  font-size: 14px;
+}
+
+.footer__col {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+}
+
+.footer__title {
+  font-weight: 900;
+  color: #111827;
+  font-size: 13px;
+  letter-spacing: -0.01em;
+}
+
+.footer__link {
+  display: inline-flex;
+  width: fit-content;
+  font-weight: 700;
+  color: rgba(17, 24, 39, 0.72);
+  font-size: 13px;
+  padding: 6px 8px;
+  border-radius: 10px;
+}
+
+.footer__link:hover {
+  background: rgba(242, 178, 74, 0.14);
+  color: #111827;
+}
+
+.footer__cta {
+  margin-top: 20px;
+  border-top: 1px solid var(--line);
+  padding-top: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.footer__cta-title {
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  font-size: 14px;
+}
+
+.footer__cta-text {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.footer__bottom {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  color: rgba(17, 24, 39, 0.62);
+  font-size: 12px;
+  line-height: 1.6;
+  font-weight: 700;
+}
+
+.footer__by {
+  color: rgba(17, 24, 39, 0.62);
+  max-width: 720px;
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -2299,6 +2407,12 @@ html {
   .page {
     padding: 28px 20px 90px;
   }
+  .footer__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .footer__brand {
+    grid-column: 1 / -1;
+  }
   .solution-grid {
     grid-template-columns: 1fr;
   }
@@ -2357,6 +2471,15 @@ html {
   }
   .page {
     padding: 24px 16px 64px;
+  }
+  .footer {
+    padding: 20px;
+  }
+  .footer__grid {
+    grid-template-columns: 1fr;
+  }
+  .footer__brand {
+    grid-column: auto;
   }
   .btn--search {
     width: 130px;
