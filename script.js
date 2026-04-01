@@ -2090,6 +2090,353 @@ const ChatbotFlow = (() => {
   return { restart };
 })();
 
+const ShortLinks = (() => {
+  const STORAGE_KEY = "lb_shortlinks_v1";
+  const API_URL = "./api/shortlinks.php";
+  const urlLikeRe = /^(https?:\/\/|mailto:|tel:)/i;
+
+  function nowMs() {
+    return Date.now();
+  }
+
+  function safeGetLinks() {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const parsed = safeParseJson(raw, []);
+    return Array.isArray(parsed) ? parsed : [];
+  }
+
+  function safeSetLinks(links) {
+    safeSetJson(STORAGE_KEY, links);
+  }
+
+  function baseUrl() {
+    return `${window.location.origin}${window.location.pathname.replace(/\/[^/]*$/, "/")}`;
+  }
+
+  function buildShortUrl(code) {
+    return `${baseUrl()}?s=${encodeURIComponent(code)}`;
+  }
+
+  function normalizeUrl(raw) {
+    return String(raw || "").trim();
+  }
+
+  function isValidUrl(raw) {
+    const v = normalizeUrl(raw);
+    if (!v) return false;
+    if (/\s/.test(v)) return false;
+    if (!urlLikeRe.test(v)) return false;
+    if (v.length > 2048) return false;
+    return true;
+  }
+
+  function isExpired(expiresAtMs) {
+    if (!expiresAtMs) return false;
+    return nowMs() > Number(expiresAtMs);
+  }
+
+  function bytesToBase64Url(bytes) {
+    let bin = "";
+    for (let i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    const b64 = btoa(bin);
+    return b64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+  }
+
+  async function generateCode(seed) {
+    const salt = new Uint8Array(16);
+    if (window.crypto?.getRandomValues) window.crypto.getRandomValues(salt);
+    const basis = `${seed}|${bytesToBase64Url(salt)}|${nowMs()}`;
+
+    if (window.crypto?.subtle?.digest) {
+      const data = new TextEncoder().encode(basis);
+      const hash = await window.crypto.subtle.digest("SHA-256", data);
+      const out = new Uint8Array(hash);
+      return bytesToBase64Url(out).slice(0, 10);
+    }
+
+    const fallback = new Uint8Array(12);
+    if (window.crypto?.getRandomValues) window.crypto.getRandomValues(fallback);
+    return bytesToBase64Url(fallback).slice(0, 10);
+  }
+
+  async function apiCreate(url, expiresInDays) {
+    const body = { action: "create", url, expiresInDays };
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new Error("api");
+    const json = await res.json();
+    if (!json?.ok || !json?.code) throw new Error("api");
+    return { code: String(json.code), shortUrl: String(json.shortUrl || buildShortUrl(json.code)) };
+  }
+
+  async function apiResolve(code) {
+    const url = `${API_URL}?action=resolve&code=${encodeURIComponent(code)}`;
+    const res = await fetch(url, { method: "GET" });
+    if (!res.ok) throw new Error("api");
+    const json = await res.json();
+    if (!json?.ok || !json?.url) throw new Error("api");
+    return { url: String(json.url) };
+  }
+
+  async function create(rawUrl, expiresInDays) {
+    const url = normalizeUrl(rawUrl);
+    const exp = Number(expiresInDays);
+    const days = Number.isFinite(exp) ? exp : 7;
+    if (!isValidUrl(url)) return { ok: false, message: "Enter a valid URL (https://, mailto:, or tel:)." };
+
+    const useApi = window.location.protocol === "https:" || window.location.hostname === "localhost";
+    if (useApi) {
+      try {
+        const api = await apiCreate(url, days);
+        return { ok: true, code: api.code, shortUrl: api.shortUrl };
+      } catch {}
+    }
+
+    const links = safeGetLinks();
+    let code = await generateCode(url);
+    while (links.some((l) => l.code === code)) {
+      code = await generateCode(url);
+    }
+
+    const createdAt = nowMs();
+    const expiresAt = days === 0 ? null : createdAt + days * 24 * 60 * 60 * 1000;
+    const next = [
+      {
+        code,
+        url,
+        createdAt,
+        expiresAt,
+        clicks: 0,
+        lastClickAt: null,
+      },
+      ...links,
+    ].slice(0, 50);
+    safeSetLinks(next);
+    return { ok: true, code, shortUrl: buildShortUrl(code) };
+  }
+
+  function resolveLocal(code) {
+    const links = safeGetLinks();
+    const idx = links.findIndex((l) => l.code === code);
+    if (idx < 0) return { ok: false, message: "Short link not found in this browser." };
+    const item = links[idx];
+    if (isExpired(item.expiresAt)) return { ok: false, message: "This short link has expired." };
+    const next = [...links];
+    next[idx] = {
+      ...item,
+      clicks: Number(item.clicks || 0) + 1,
+      lastClickAt: nowMs(),
+    };
+    safeSetLinks(next);
+    return { ok: true, url: String(item.url || "") };
+  }
+
+  async function resolve(code) {
+    const clean = String(code || "").trim();
+    if (!clean) return { ok: false, message: "Missing short link code." };
+
+    const useApi = window.location.protocol === "https:" || window.location.hostname === "localhost";
+    if (useApi) {
+      try {
+        const api = await apiResolve(clean);
+        return { ok: true, url: api.url };
+      } catch {}
+    }
+
+    return resolveLocal(clean);
+  }
+
+  function updateShareLinks(shortUrl) {
+    const x = document.getElementById("share-x");
+    const wa = document.getElementById("share-whatsapp");
+    const fb = document.getElementById("share-facebook");
+    const u = encodeURIComponent(String(shortUrl || ""));
+    if (x) x.setAttribute("href", `https://twitter.com/intent/tweet?url=${u}`);
+    if (wa) wa.setAttribute("href", `https://wa.me/?text=${u}`);
+    if (fb) fb.setAttribute("href", `https://www.facebook.com/sharer/sharer.php?u=${u}`);
+  }
+
+  function renderList() {
+    const root = document.getElementById("share-list");
+    if (!root) return;
+    root.innerHTML = "";
+    const links = safeGetLinks();
+    if (!links.length) {
+      const empty = document.createElement("div");
+      empty.className = "ws-empty";
+      empty.textContent = "No short links created yet.";
+      root.appendChild(empty);
+      return;
+    }
+
+    links.forEach((l) => {
+      const row = document.createElement("button");
+      row.type = "button";
+      row.className = "ws-link";
+      row.setAttribute("data-share-code", String(l.code || ""));
+
+      const icon = document.createElement("div");
+      icon.className = "ws-link__drag";
+      icon.textContent = "🔗";
+
+      const meta = document.createElement("div");
+      meta.className = "ws-link__meta";
+
+      const title = document.createElement("div");
+      title.className = "ws-link__title";
+      title.textContent = buildShortUrl(l.code);
+
+      const hint = document.createElement("div");
+      hint.className = "ws-link__url";
+      const clicks = Number(l.clicks || 0);
+      hint.textContent = isExpired(l.expiresAt) ? `Expired · ${clicks} clicks` : `${clicks} clicks`;
+
+      meta.appendChild(title);
+      meta.appendChild(hint);
+
+      const actions = document.createElement("div");
+      actions.className = "ws-link__actions";
+
+      const open = document.createElement("div");
+      open.className = "ws-link__btn";
+      open.textContent = "→";
+      actions.appendChild(open);
+
+      row.appendChild(icon);
+      row.appendChild(meta);
+      row.appendChild(actions);
+      root.appendChild(row);
+    });
+  }
+
+  function getDefaultShareUrl() {
+    if (!isLoggedIn() || typeof getWorkspace !== "function") return "";
+    const ws = getWorkspace();
+    const handle = normalizeHandle(ws?.profile?.handle || "");
+    const base = baseUrl();
+    return handle ? `${base}?u=${encodeURIComponent(handle)}` : base;
+  }
+
+  async function copy(text) {
+    const value = String(text || "");
+    if (!value) return false;
+    if (navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(value);
+        return true;
+      } catch {}
+    }
+    const input = document.createElement("input");
+    input.value = value;
+    input.setAttribute("readonly", "true");
+    input.style.position = "fixed";
+    input.style.left = "-9999px";
+    document.body.appendChild(input);
+    input.select();
+    let ok = false;
+    try {
+      ok = document.execCommand("copy");
+    } catch {
+      ok = false;
+    }
+    input.remove();
+    return ok;
+  }
+
+  function bindShareUi() {
+    const modal = document.getElementById("modal-share");
+    if (!modal) return;
+
+    const urlInput = document.getElementById("share-url");
+    const exp = document.getElementById("share-exp");
+    const createBtn = document.getElementById("share-create");
+    const status = document.getElementById("share-status");
+    const out = document.getElementById("share-short");
+    const copyBtn = document.getElementById("share-copy");
+
+    const setStatusText = (t) => {
+      if (status) status.textContent = String(t || "");
+    };
+
+    document.addEventListener("click", (e) => {
+      const trigger = e.target.closest('[data-modal="share"]');
+      if (!trigger) return;
+      window.setTimeout(() => {
+        if (urlInput instanceof HTMLInputElement) {
+          urlInput.value = getDefaultShareUrl();
+        }
+        if (out instanceof HTMLInputElement) out.value = "";
+        updateShareLinks("");
+        setStatusText("");
+        renderList();
+      }, 0);
+    });
+
+    if (createBtn instanceof HTMLButtonElement) {
+      createBtn.addEventListener("click", async () => {
+        if (!(urlInput instanceof HTMLInputElement)) return;
+        const expDays = exp instanceof HTMLSelectElement ? Number(exp.value) : 7;
+        createBtn.disabled = true;
+        setStatusText("Generating…");
+        const res = await create(urlInput.value, expDays);
+        createBtn.disabled = false;
+        if (!res.ok) {
+          setStatusText(res.message || "Could not create short link.");
+          return;
+        }
+        if (out instanceof HTMLInputElement) out.value = res.shortUrl;
+        updateShareLinks(res.shortUrl);
+        setStatusText("Short link generated.");
+        renderList();
+      });
+    }
+
+    if (copyBtn instanceof HTMLButtonElement) {
+      copyBtn.addEventListener("click", async () => {
+        if (!(out instanceof HTMLInputElement)) return;
+        const ok = await copy(out.value);
+        setStatusText(ok ? "Copied." : "Could not copy automatically.");
+      });
+    }
+
+    modal.addEventListener("click", async (e) => {
+      const row = e.target.closest("[data-share-code]");
+      if (!row) return;
+      const code = row.getAttribute("data-share-code") || "";
+      const url = buildShortUrl(code);
+      if (out instanceof HTMLInputElement) out.value = url;
+      updateShareLinks(url);
+      const ok = await copy(url);
+      setStatusText(ok ? "Copied selected short link." : "Selected short link.");
+    });
+  }
+
+  async function handleRedirect() {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("s");
+    if (!code) return;
+    const result = await resolve(code);
+    if (result.ok && result.url) {
+      window.location.replace(result.url);
+      return;
+    }
+    closeAllModals();
+    openModal("share");
+    const status = document.getElementById("share-status");
+    if (status) status.textContent = result.message || "Could not resolve this short link.";
+    const out = document.getElementById("share-short");
+    if (out instanceof HTMLInputElement) out.value = "";
+  }
+
+  bindShareUi();
+  handleRedirect();
+
+  return { create, resolve, isValidUrl };
+})();
+
 const params = new URLSearchParams(window.location.search);
 if (params.get("lb_test") === "1") {
   const assert = (cond, msg) => {
@@ -2152,11 +2499,20 @@ if (params.get("lb_test") === "1") {
     assert(input.type !== start, "Expected password field type to toggle");
   };
 
+  const testShortLinks = () => {
+    assert(ShortLinks.isValidUrl("https://example.com"), "Expected https URL valid");
+    assert(ShortLinks.isValidUrl("mailto:hello@example.com"), "Expected mailto URL valid");
+    assert(ShortLinks.isValidUrl("tel:+919999999999"), "Expected tel URL valid");
+    assert(!ShortLinks.isValidUrl("example.com"), "Expected missing scheme invalid");
+    assert(!ShortLinks.isValidUrl("javascript:alert(1)"), "Expected unsafe scheme invalid");
+  };
+
   try {
     testEmail();
     testSignup();
     testContact();
     testTogglePassword();
+    testShortLinks();
     console.log("[LensBlaze] Form tests passed");
   } catch (err) {
     console.error("[LensBlaze] Form tests failed", err);
