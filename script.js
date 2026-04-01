@@ -1507,6 +1507,589 @@ initFormSystem();
 updateAuthVisibility();
 initWorkspace();
 
+const ChatbotFlow = (() => {
+  const TEMPLATE_MAP = {
+    Minimal: "minimal",
+    Grid: "grid",
+    Story: "feed",
+    Editorial: "editorial",
+    Conversion: "booking",
+    Creative: "experimental",
+  };
+
+  const state = {
+    path: ["start"],
+  };
+
+  function el(id) {
+    return document.getElementById(id);
+  }
+
+  function progress(flow, step, total) {
+    if (!flow) return "";
+    if (!step || !total) return flow;
+    return `${flow} · Step ${step} of ${total}`;
+  }
+
+  function getContext() {
+    const loggedIn = isLoggedIn();
+    const ws = loggedIn && typeof getWorkspace === "function" ? getWorkspace() : null;
+    return { loggedIn, ws };
+  }
+
+  function buildPublicProfileUrl(ws) {
+    const handle = normalizeHandle(ws?.profile?.handle || "");
+    const base = `${window.location.origin}${window.location.pathname.replace(/\/[^/]*$/, "/")}`;
+    return handle ? `${base}?u=${encodeURIComponent(handle)}` : base;
+  }
+
+  function requireLogin() {
+    if (isLoggedIn()) return true;
+    const loginLink = document.getElementById("auth-login-link");
+    if (loginLink) loginLink.setAttribute("href", buildLoginUrl("./index.html#workspace"));
+    closeAllDropdowns();
+    openModal("auth");
+    return false;
+  }
+
+  function goWorkspace(panelId) {
+    if (!requireLogin()) return;
+    closeAllModals();
+    window.location.hash = "#workspace";
+    window.setTimeout(() => {
+      if (panelId) activateWorkspacePanel(panelId);
+    }, 0);
+  }
+
+  function copyToClipboard(text) {
+    const value = String(text || "");
+    if (!value) return Promise.resolve(false);
+    if (navigator.clipboard?.writeText) return navigator.clipboard.writeText(value).then(() => true, () => false);
+
+    const input = document.createElement("input");
+    input.value = value;
+    input.setAttribute("readonly", "true");
+    input.style.position = "fixed";
+    input.style.left = "-9999px";
+    document.body.appendChild(input);
+    input.select();
+    let ok = false;
+    try {
+      ok = document.execCommand("copy");
+    } catch {
+      ok = false;
+    }
+    input.remove();
+    return Promise.resolve(ok);
+  }
+
+  function setTemplate(label) {
+    if (!requireLogin()) return;
+    const id = TEMPLATE_MAP[label] || "minimal";
+    const ws = getWorkspace();
+    setWorkspace({ ...ws, bio: { ...ws.bio, template: id } });
+  }
+
+  function publishWorkspace() {
+    if (!requireLogin()) return;
+    closeAllModals();
+    window.location.hash = "#workspace";
+    window.setTimeout(() => {
+      const btn = document.getElementById("workspace-publish");
+      if (btn instanceof HTMLButtonElement) btn.click();
+    }, 0);
+  }
+
+  function openLoginPage() {
+    window.location.href = buildLoginUrl("./index.html#workspace");
+  }
+
+  function nodes(ctx) {
+    const tip = (() => {
+      if (!ctx.loggedIn) return "";
+      if (ctx.ws?.bio?.published) return "";
+      return "Quick tip: publish your bio page for a fast “shareable link” win.";
+    })();
+
+    return {
+      start: {
+        progress: "Start",
+        message: tip ? `Welcome to LensBlaze. What would you like to do? ${tip}` : "Welcome to LensBlaze. What would you like to do?",
+        options: [
+          { label: "Get started", next: "onboarding_start" },
+          { label: "Build my bio page", next: "bio_entry" },
+          { label: "Deliver photos to clients", next: "gallery_entry" },
+          { label: "Sell prints or downloads", next: "store_entry" },
+          { label: "Manage bookings", next: "booking_entry" },
+          { label: "Fix an issue", next: "issue_entry" },
+          { label: "Pricing & plans", next: "pricing_entry" },
+        ],
+      },
+
+      onboarding_start: {
+        progress: progress("Get Started", 1, 2),
+        message: "Are you new to LensBlaze?",
+        options: [
+          { label: "Yes, I’m new", next: "onboarding_new" },
+          {
+            label: "I already have an account",
+            action: () => {
+              if (ctx.loggedIn) goWorkspace("profile");
+              else openLoginPage();
+            },
+          },
+        ],
+      },
+
+      onboarding_new: {
+        progress: progress("Get Started", 2, 2),
+        message: "What do you want to set up first?",
+        options: [
+          { label: "Bio page (quick start)", next: "bio_entry" },
+          { label: "Client galleries", next: "gallery_entry" },
+          { label: "Full website", next: "website_entry" },
+          {
+            label: "Just explore",
+            action: () => {
+              closeAllModals();
+              window.location.hash = "#overview";
+            },
+          },
+        ],
+      },
+
+      bio_entry: {
+        progress: progress("Bio Page", 1, 3),
+        message: "Let’s create your bio page.",
+        options: [{ label: "Choose a style", next: "bio_style" }],
+      },
+
+      bio_style: {
+        progress: progress("Bio Page", 1, 3),
+        message: "Choose a style:",
+        options: [
+          { label: "Minimal", next: "bio_add", action: () => setTemplate("Minimal") },
+          { label: "Grid", next: "bio_add", action: () => setTemplate("Grid") },
+          { label: "Story", next: "bio_add", action: () => setTemplate("Story") },
+          { label: "Editorial", next: "bio_add", action: () => setTemplate("Editorial") },
+          { label: "Conversion", next: "bio_add", action: () => setTemplate("Conversion") },
+          { label: "Creative", next: "bio_add", action: () => setTemplate("Creative") },
+        ],
+      },
+
+      bio_add: {
+        progress: progress("Bio Page", 2, 3),
+        message: "What would you like to add?",
+        options: [
+          { label: "Add links", action: () => goWorkspace("links") },
+          { label: "Add gallery", action: () => goWorkspace("galleries") },
+          { label: "Add booking button", action: () => goWorkspace("bookings") },
+          { label: "Customize design", action: () => goWorkspace("bio") },
+          { label: "Continue", next: "bio_publish" },
+        ],
+      },
+
+      bio_publish: {
+        progress: progress("Bio Page", 3, 3),
+        message: "Ready to publish?",
+        options: [
+          { label: "Publish now", action: () => publishWorkspace(), next: "bio_exit" },
+          { label: "Preview first", action: () => goWorkspace("bio") },
+          { label: "Edit more", action: () => goWorkspace("profile") },
+          { label: "Continue", next: "bio_exit" },
+        ],
+      },
+
+      bio_exit: {
+        progress: "Bio Page",
+        message: "Your bio page is live. Want to share it?",
+        options: [
+          {
+            label: "Copy link",
+            action: async () => {
+              const nextCtx = getContext();
+              if (!nextCtx.loggedIn) {
+                openLoginPage();
+                return;
+              }
+              const url = buildPublicProfileUrl(nextCtx.ws);
+              const ok = await copyToClipboard(url);
+              const status = el("chatbot-message");
+              if (status) status.textContent = ok ? "Copied your bio page link." : "Couldn’t copy automatically. Open the page and copy the URL.";
+            },
+          },
+          {
+            label: "Open page",
+            action: () => {
+              const nextCtx = getContext();
+              if (!nextCtx.loggedIn) {
+                openLoginPage();
+                return;
+              }
+              window.open(buildPublicProfileUrl(nextCtx.ws), "_blank", "noopener");
+            },
+          },
+          { label: "Continue setup", next: "onboarding_new" },
+          { label: "Go to dashboard", action: () => goWorkspace("profile") },
+        ],
+      },
+
+      gallery_entry: {
+        progress: "Client Galleries",
+        message: "Upload and deliver photos to your clients. What would you like to do?",
+        options: [
+          { label: "Upload new gallery", next: "gallery_upload" },
+          { label: "Share gallery", next: "gallery_share" },
+          { label: "Enable downloads", next: "gallery_downloads" },
+          { label: "Client proofing", next: "gallery_proofing" },
+        ],
+      },
+
+      gallery_upload: {
+        progress: progress("Client Galleries", 1, 4),
+        message: "Upload your images and name your gallery.",
+        options: [
+          { label: "Continue upload", action: () => goWorkspace("galleries") },
+          { label: "Cancel", next: "start" },
+        ],
+      },
+
+      gallery_share: {
+        progress: progress("Client Galleries", 2, 4),
+        message: "Set access permissions and send your gallery to the client.",
+        options: [
+          { label: "Public", action: () => goWorkspace("galleries") },
+          { label: "Private (link only)", action: () => goWorkspace("galleries") },
+          { label: "Password protected", action: () => goWorkspace("galleries") },
+          { label: "Done", next: "start" },
+        ],
+      },
+
+      gallery_downloads: {
+        progress: progress("Client Galleries", 3, 4),
+        message: "Enable features like favorites, downloads, and watermarking.",
+        options: [
+          { label: "Favorites", action: () => goWorkspace("galleries") },
+          { label: "Downloads", action: () => goWorkspace("galleries") },
+          { label: "Watermark", action: () => goWorkspace("galleries") },
+          { label: "Done", next: "start" },
+        ],
+      },
+
+      gallery_proofing: {
+        progress: progress("Client Galleries", 4, 4),
+        message: "Proofing helps clients select their favorites quickly.",
+        options: [
+          { label: "Enable proofing", action: () => goWorkspace("galleries") },
+          { label: "Done", next: "start" },
+        ],
+      },
+
+      store_entry: {
+        progress: "Store",
+        message: "Start selling your work. What do you want to sell?",
+        options: [
+          { label: "Prints", next: "store_pricing" },
+          { label: "Digital downloads", next: "store_pricing" },
+          { label: "Packages", next: "store_pricing" },
+        ],
+      },
+
+      store_pricing: {
+        progress: progress("Store", 2, 3),
+        message: "Set pricing:",
+        options: [
+          { label: "Add price", action: () => goWorkspace("store") },
+          { label: "Create package", action: () => goWorkspace("store") },
+          { label: "Add discount", action: () => goWorkspace("store") },
+          { label: "Continue", next: "store_checkout" },
+        ],
+      },
+
+      store_checkout: {
+        progress: progress("Store", 3, 3),
+        message: "Enable checkout?",
+        options: [
+          { label: "Yes", action: () => goWorkspace("store") },
+          { label: "Not now", next: "start" },
+        ],
+      },
+
+      booking_entry: {
+        progress: "Bookings & Leads",
+        message: "Capture and manage client inquiries. What do you want to do?",
+        options: [
+          { label: "Create inquiry form", next: "booking_fields" },
+          { label: "View leads", action: () => goWorkspace("bookings") },
+          { label: "Automate replies", next: "booking_autoresponse" },
+        ],
+      },
+
+      booking_fields: {
+        progress: progress("Bookings & Leads", 2, 3),
+        message: "Add fields to your form:",
+        options: [
+          { label: "Name", action: () => goWorkspace("bookings") },
+          { label: "Email", action: () => goWorkspace("bookings") },
+          { label: "Event type", action: () => goWorkspace("bookings") },
+          { label: "Message", action: () => goWorkspace("bookings") },
+          { label: "Continue", next: "booking_autoresponse" },
+        ],
+      },
+
+      booking_autoresponse: {
+        progress: progress("Bookings & Leads", 3, 3),
+        message: "Enable auto-response?",
+        options: [
+          { label: "Yes", action: () => goWorkspace("bookings") },
+          { label: "No", action: () => goWorkspace("bookings") },
+          { label: "Done", next: "start" },
+        ],
+      },
+
+      website_entry: {
+        progress: "Website Builder",
+        message: "Build your photography website. Choose a layout:",
+        options: [
+          { label: "Portfolio", next: "website_sections" },
+          { label: "Business", next: "website_sections" },
+          { label: "Personal brand", next: "website_sections" },
+        ],
+      },
+
+      website_sections: {
+        progress: progress("Website Builder", 2, 3),
+        message: "Add sections:",
+        options: [
+          { label: "Gallery", action: () => goWorkspace("galleries") },
+          { label: "About", action: () => goWorkspace("profile") },
+          { label: "Contact", action: () => closeAllModals() },
+          { label: "Services", action: () => goWorkspace("store") },
+          { label: "Continue", next: "website_domain" },
+        ],
+      },
+
+      website_domain: {
+        progress: progress("Website Builder", 3, 3),
+        message: "Connect domain?",
+        options: [
+          { label: "Yes", action: () => goWorkspace("account") },
+          { label: "Later", next: "start" },
+        ],
+      },
+
+      pricing_entry: {
+        progress: "Pricing & Plans",
+        message: "Explore plans and features. What do you want to know?",
+        options: [
+          {
+            label: "Free plan details",
+            action: () => {
+              closeAllModals();
+              window.location.hash = "#pricing";
+            },
+          },
+          {
+            label: "Trial (30/60/90 days)",
+            action: () => {
+              closeAllModals();
+              window.location.hash = "#pricing";
+            },
+          },
+          {
+            label: "Upgrade options",
+            action: () => {
+              closeAllModals();
+              window.location.hash = "#pricing";
+            },
+          },
+          { label: "Do you want to upgrade?", next: "pricing_upgrade" },
+        ],
+      },
+
+      pricing_upgrade: {
+        progress: "Pricing & Plans",
+        message: "Do you want to upgrade?",
+        options: [
+          { label: "Yes", action: () => (closeAllModals(), openModal("contact")) },
+          { label: "Not now", next: "start" },
+        ],
+      },
+
+      issue_entry: {
+        progress: "Fix an Issue",
+        message: "What issue are you facing?",
+        options: [
+          { label: "Login problem", next: "issue_login" },
+          { label: "Gallery not working", next: "issue_gallery" },
+          { label: "Payment issue", next: "issue_payment" },
+          { label: "Email not sending", next: "issue_email" },
+          { label: "Something else", next: "issue_other" },
+        ],
+      },
+
+      issue_login: {
+        progress: "Fix an Issue",
+        message: "Try: reset password and check email verification.",
+        options: [
+          { label: "Reset now", action: () => (window.location.href = "mailto:support@lensblaze.com?subject=Password%20reset") },
+          { label: "Contact support", action: () => (closeAllModals(), openModal("contact")) },
+          { label: "Back to menu", next: "start" },
+        ],
+      },
+
+      issue_gallery: {
+        progress: "Fix an Issue",
+        message: "If galleries are not loading, confirm access settings and try again.",
+        options: [
+          { label: "Open galleries settings", action: () => goWorkspace("galleries") },
+          { label: "Contact support", action: () => (closeAllModals(), openModal("contact")) },
+          { label: "Back to menu", next: "start" },
+        ],
+      },
+
+      issue_payment: {
+        progress: "Fix an Issue",
+        message: "For payment issues, confirm plan status and checkout details.",
+        options: [
+          { label: "View billing", action: () => goWorkspace("billing") },
+          { label: "Contact support", action: () => (closeAllModals(), openModal("contact")) },
+          { label: "Back to menu", next: "start" },
+        ],
+      },
+
+      issue_email: {
+        progress: "Fix an Issue",
+        message: "If emails are not sending, double-check address and spam folder.",
+        options: [
+          { label: "Check notifications", action: () => goWorkspace("notifications") },
+          { label: "Contact support", action: () => (closeAllModals(), openModal("contact")) },
+          { label: "Back to menu", next: "start" },
+        ],
+      },
+
+      issue_other: {
+        progress: "Fix an Issue",
+        message: "Still need help?",
+        options: [
+          { label: "Contact support", action: () => (closeAllModals(), openModal("contact")) },
+          { label: "Restart", action: () => restart() },
+        ],
+      },
+    };
+  }
+
+  function render() {
+    const root = el("modal-chatbot");
+    const msgEl = el("chatbot-message");
+    const optionsEl = el("chatbot-options");
+    const progressEl = el("chatbot-progress");
+    const backBtn = el("chatbot-back");
+
+    if (!root || !msgEl || !optionsEl || !progressEl) return;
+
+    const ctx = getContext();
+    const all = nodes(ctx);
+    const currentId = state.path[state.path.length - 1] || "start";
+    const node = all[currentId] || all.start;
+
+    progressEl.textContent = node.progress || "";
+    msgEl.textContent = node.message || "";
+
+    optionsEl.innerHTML = "";
+    (node.options || []).forEach((opt, idx) => {
+      const row = document.createElement("button");
+      row.type = "button";
+      row.className = "ws-link";
+      row.setAttribute("data-chat-option", String(idx));
+
+      const icon = document.createElement("div");
+      icon.className = "ws-link__drag";
+      icon.textContent = String(idx + 1);
+
+      const meta = document.createElement("div");
+      meta.className = "ws-link__meta";
+
+      const title = document.createElement("div");
+      title.className = "ws-link__title";
+      title.textContent = opt.label || "Option";
+
+      const hint = document.createElement("div");
+      hint.className = "ws-link__url";
+      hint.textContent = opt.next ? "Continue" : "Open";
+
+      meta.appendChild(title);
+      meta.appendChild(hint);
+
+      const actions = document.createElement("div");
+      actions.className = "ws-link__actions";
+
+      const arrow = document.createElement("div");
+      arrow.className = "ws-link__btn";
+      arrow.textContent = "→";
+      actions.appendChild(arrow);
+
+      row.appendChild(icon);
+      row.appendChild(meta);
+      row.appendChild(actions);
+
+      row.addEventListener("click", async () => {
+        const nextCtx = getContext();
+        const allNow = nodes(nextCtx);
+        const activeId = state.path[state.path.length - 1] || "start";
+        const active = allNow[activeId] || allNow.start;
+        const nextOpt = (active.options || [])[idx];
+        if (!nextOpt) return;
+        if (typeof nextOpt.action === "function") await nextOpt.action();
+        if (nextOpt.next) {
+          state.path.push(nextOpt.next);
+          render();
+        }
+      });
+
+      optionsEl.appendChild(row);
+    });
+
+    if (backBtn instanceof HTMLButtonElement) backBtn.disabled = state.path.length <= 1;
+  }
+
+  function back() {
+    if (state.path.length <= 1) return;
+    state.path.pop();
+    render();
+  }
+
+  function restart() {
+    state.path = ["start"];
+    render();
+  }
+
+  function bind() {
+    const root = el("modal-chatbot");
+    if (!root) return;
+
+    const backBtn = el("chatbot-back");
+    if (backBtn instanceof HTMLButtonElement) backBtn.addEventListener("click", () => back());
+
+    const restartBtn = el("chatbot-restart");
+    if (restartBtn instanceof HTMLButtonElement) restartBtn.addEventListener("click", () => restart());
+
+    document.addEventListener("click", (e) => {
+      const trigger = e.target.closest('[data-modal="chatbot"]');
+      if (!trigger) return;
+      window.setTimeout(() => {
+        restart();
+      }, 0);
+    });
+
+    render();
+  }
+
+  bind();
+
+  return { restart };
+})();
+
 const params = new URLSearchParams(window.location.search);
 if (params.get("lb_test") === "1") {
   const assert = (cond, msg) => {
