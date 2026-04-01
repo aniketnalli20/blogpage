@@ -185,6 +185,7 @@ a {
   border: 1px solid var(--line);
   background: #fff;
   box-shadow: 0 10px 22px rgba(17, 24, 39, 0.06);
+  line-height: 1;
 }
 
 .nav__avatar {
@@ -370,6 +371,11 @@ a {
   display: grid;
   place-items: center;
   color: rgba(17, 24, 39, 0.55);
+  line-height: 1;
+}
+
+.auth-field__toggle svg {
+  display: block;
 }
 
 .auth-row {
@@ -431,6 +437,12 @@ a {
   font-weight: 700;
   font-size: 13px;
   color: #111827;
+  line-height: 1.2;
+}
+
+.auth-social__btn svg {
+  display: block;
+  flex: 0 0 auto;
 }
 
 .auth-social__btn:hover {
@@ -989,6 +1001,9 @@ a {
   cursor: pointer;
   font-weight: 900;
   color: rgba(17, 24, 39, 0.7);
+  display: grid;
+  place-items: center;
+  line-height: 1;
 }
 
 .ws-add {
