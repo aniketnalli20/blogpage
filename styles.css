@@ -622,6 +622,11 @@ html {
   margin-top: 18px;
 }
 
+.modal .integration-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 10px;
+}
+
 .integration {
   background: rgba(255, 255, 255, 0.9);
   border: 1px solid var(--line);

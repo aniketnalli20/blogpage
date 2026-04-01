@@ -38,6 +38,7 @@ document.addEventListener("click", (e) => {
     const name = modalTrigger.getAttribute("data-modal");
     const plan = modalTrigger.getAttribute("data-plan");
     if (name === "signup") setSignupPlan(plan);
+    closeAllModals();
     closeAllDropdowns();
     openModal(name);
     return;
