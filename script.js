@@ -2456,6 +2456,30 @@ const ShortLinks = (() => {
   return { create, resolve, isValidUrl };
 })();
 
+const SupportModalSizing = (() => {
+  let rafId = 0;
+
+  function apply() {
+    rafId = 0;
+    const w = Math.round(window.innerWidth * 0.5);
+    const h = Math.round(window.innerHeight * 0.5);
+    document.querySelectorAll(".modal--support .modal__panel").forEach((panel) => {
+      panel.style.setProperty("--support-w", `${w}px`);
+      panel.style.setProperty("--support-h", `${h}px`);
+    });
+  }
+
+  function onResize() {
+    if (rafId) return;
+    rafId = window.requestAnimationFrame(apply);
+  }
+
+  window.addEventListener("resize", onResize, { passive: true });
+  apply();
+
+  return {};
+})();
+
 const params = new URLSearchParams(window.location.search);
 if (params.get("lb_test") === "1") {
   const assert = (cond, msg) => {

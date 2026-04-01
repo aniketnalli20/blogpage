@@ -2224,8 +2224,8 @@ html {
 }
 
 .modal--support .modal__panel {
-  width: 50vw;
-  height: 50vh;
+  width: var(--support-w, 50vw);
+  height: var(--support-h, 50vh);
   max-width: calc(100vw - 28px);
   max-height: calc(100vh - 28px);
   min-width: 320px;
