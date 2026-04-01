@@ -762,6 +762,7 @@ a {
   --tp-accent-2: #f2b24a;
   --tp-radius: 18px;
   --tp-gap: 10px;
+  --tp-max-h: 420px;
   background: var(--tp-bg);
   color: var(--tp-text);
   border-radius: 16px;
@@ -770,6 +771,7 @@ a {
   display: grid;
   gap: var(--tp-gap);
   overflow: hidden;
+  max-height: var(--tp-max-h);
 }
 
 .tp__profile {
@@ -966,6 +968,7 @@ a {
   --tp-accent: #f59e0b;
   --tp-accent-2: #f97316;
   --tp-gap: 10px;
+  --tp-max-h: none;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
 }
 
@@ -1004,10 +1007,6 @@ a {
   .template-preview[data-template="grid"] .tp__grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-}
-
-.template-preview[data-template="grid"] .tp {
-  max-height: none;
 }
 
 .template-preview[data-template="feed"] .tp {
