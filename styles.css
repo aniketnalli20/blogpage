@@ -600,11 +600,13 @@ a {
 }
 
 .hero__thumb--three {
-  background-image: url("https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=900&q=80");
+  background-image: radial-gradient(circle at 70% 35%, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0) 55%),
+    linear-gradient(135deg, rgba(16, 185, 129, 0.85), rgba(20, 184, 166, 0.7));
 }
 
 .hero__thumb--four {
-  background-image: url("https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=900&q=80");
+  background-image: radial-gradient(circle at 28% 30%, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0) 55%),
+    linear-gradient(135deg, rgba(99, 102, 241, 0.85), rgba(236, 72, 153, 0.65));
 }
 
 .hero__stats {
