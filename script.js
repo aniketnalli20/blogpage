@@ -1923,7 +1923,6 @@ const ChatbotFlow = (() => {
             },
           },
           { label: "Book a package", next: "pricing_upgrade" },
-        ],
           { label: "Ask a question", action: () => (closeAllModals(), openModal("contact")) },
         ],
       },
