@@ -2114,6 +2114,94 @@ html {
   margin-right: auto;
 }
 
+.links-page .page {
+  background: radial-gradient(900px 600px at 12% -10%, rgba(242, 178, 74, 0.18), rgba(255, 255, 255, 0) 55%),
+    radial-gradient(1000px 700px at 88% -20%, rgba(90, 205, 255, 0.16), rgba(255, 255, 255, 0) 55%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 1));
+  border-radius: 32px;
+  border: 1px solid rgba(17, 24, 39, 0.06);
+}
+
+.links-page .section--contrast {
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(10px);
+}
+
+.links-page #terms.section--contrast,
+.links-page #privacy.section--contrast {
+  border-radius: 30px;
+  border: 1px solid rgba(17, 24, 39, 0.1);
+  box-shadow: 0 22px 64px rgba(17, 24, 39, 0.08);
+}
+
+.legal {
+  display: grid;
+  gap: 16px;
+  margin-top: 14px;
+}
+
+.legal__block {
+  border: 1px solid rgba(17, 24, 39, 0.1);
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 18px;
+  padding: 16px 16px 14px;
+  box-shadow: 0 14px 40px rgba(17, 24, 39, 0.06);
+  position: relative;
+}
+
+.legal__block::before {
+  content: "";
+  position: absolute;
+  left: 14px;
+  top: 14px;
+  bottom: 14px;
+  width: 3px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(242, 178, 74, 0.9), rgba(240, 138, 42, 0.6));
+  opacity: 0.85;
+}
+
+.legal__h {
+  margin: 0 0 10px;
+  padding-left: 12px;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: #111827;
+}
+
+.legal__p {
+  margin: 0;
+  padding-left: 12px;
+  color: rgba(17, 24, 39, 0.76);
+  line-height: 1.8;
+  font-size: 14px;
+}
+
+.links-page #terms .section__subtitle,
+.links-page #privacy .section__subtitle {
+  font-weight: 700;
+  color: rgba(17, 24, 39, 0.58);
+}
+
+@media (max-width: 720px) {
+  .links-page .page {
+    border-radius: 26px;
+  }
+  .legal__block {
+    padding: 14px 14px 12px;
+  }
+  .legal__block::before {
+    left: 12px;
+    top: 12px;
+    bottom: 12px;
+  }
+  .legal__h,
+  .legal__p {
+    padding-left: 10px;
+  }
+}
+
 .solution-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
